@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from './components/Header.tsx';
 import InputSection from './components/InputSection.tsx';
 import ScriptOutput from './components/ScriptOutput.tsx';
@@ -29,6 +29,19 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
+  // AUTO-OPEN SETTINGS IF NO KEY (Good for Github Pages / Vercel first visit)
+  useEffect(() => {
+    const localKey = localStorage.getItem("GEMINI_API_KEY");
+    // Also check Vite Env Vars
+    // @ts-ignore
+    const envKey = (typeof import.meta !== 'undefined' && import.meta.env) ? import.meta.env.VITE_GEMINI_API_KEY : undefined;
+    
+    if (!localKey && !envKey) {
+        // Delay slightly to let animation load
+        setTimeout(() => setIsSettingsOpen(true), 500);
+    }
+  }, []);
+
   // Function to handle generating script from file lines (called when user clicks "Tạo Nội Dung")
   const handleGenerateFromLines = async (lines: string[]) => {
     setIsLoading(true);
@@ -42,6 +55,10 @@ const App: React.FC = () => {
     } catch (err: any) {
         console.error(err);
         setError(err.message || "Lỗi khi xử lý file. Vui lòng kiểm tra API Key trong Cài đặt.");
+        // If error suggests missing key, open settings
+        if (err.message && (err.message.includes("API Key") || err.message.includes("403"))) {
+            setIsSettingsOpen(true);
+        }
     } finally {
         setIsLoading(false);
     }
@@ -82,7 +99,7 @@ const App: React.FC = () => {
             
             {/* Error Message */}
             {error && (
-              <div className="w-full p-4 bg-red-900/20 border border-red-500/50 rounded text-red-400 text-center mb-6 animate-pulse">
+              <div className="w-full p-4 bg-red-900/20 border border-red-500/50 rounded text-red-400 text-center mb-6 animate-pulse font-bold">
                 {error}
               </div>
             )}
