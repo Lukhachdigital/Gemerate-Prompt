@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Header from './components/Header.tsx';
 import InputSection from './components/InputSection.tsx';
 import ScriptOutput from './components/ScriptOutput.tsx';
-import SettingsModal from './components/SettingsModal.tsx';
 import { GeneratedContent, FilmStyle, PromptItem, DialogueOption, CharacterProfile } from './types.ts';
 import { generateScriptFromList } from './services/geminiService.ts';
 
@@ -23,24 +22,8 @@ const App: React.FC = () => {
   // Track if current content came from a file
   const [isGeneratedFromFile, setIsGeneratedFromFile] = useState<boolean>(false);
 
-  // Settings Modal State
-  const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
-
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-
-  // AUTO-OPEN SETTINGS IF NO KEY (Good for Github Pages / Vercel first visit)
-  useEffect(() => {
-    const localKey = localStorage.getItem("GEMINI_API_KEY");
-    // Also check Vite Env Vars
-    // @ts-ignore
-    const envKey = (typeof import.meta !== 'undefined' && import.meta.env) ? import.meta.env.VITE_GEMINI_API_KEY : undefined;
-    
-    if (!localKey && !envKey) {
-        // Delay slightly to let animation load
-        setTimeout(() => setIsSettingsOpen(true), 500);
-    }
-  }, []);
 
   // Function to handle generating script from file lines (called when user clicks "Tạo Nội Dung")
   const handleGenerateFromLines = async (lines: string[]) => {
@@ -54,11 +37,7 @@ const App: React.FC = () => {
         setContent(result);
     } catch (err: any) {
         console.error(err);
-        setError(err.message || "Lỗi khi xử lý file. Vui lòng kiểm tra API Key trong Cài đặt.");
-        // If error suggests missing key, open settings
-        if (err.message && (err.message.includes("API Key") || err.message.includes("403"))) {
-            setIsSettingsOpen(true);
-        }
+        setError("Lỗi khi xử lý file. Vui lòng thử lại.");
     } finally {
         setIsLoading(false);
     }
@@ -74,7 +53,7 @@ const App: React.FC = () => {
 
   return (
     <div className="flex flex-col h-screen bg-black text-gray-100 selection:bg-amber-500 selection:text-black overflow-hidden font-sans">
-      <Header onOpenSettings={() => setIsSettingsOpen(true)} />
+      <Header />
       
       <div className="flex flex-1 overflow-hidden">
         {/* Left Sidebar - Style & File Upload */}
@@ -99,7 +78,7 @@ const App: React.FC = () => {
             
             {/* Error Message */}
             {error && (
-              <div className="w-full p-4 bg-red-900/20 border border-red-500/50 rounded text-red-400 text-center mb-6 animate-pulse font-bold">
+              <div className="w-full p-4 bg-red-900/20 border border-red-500/50 rounded text-red-400 text-center mb-6 animate-pulse">
                 {error}
               </div>
             )}
@@ -129,12 +108,6 @@ const App: React.FC = () => {
           </div>
         </main>
       </div>
-
-      {/* Settings Modal */}
-      <SettingsModal 
-        isOpen={isSettingsOpen} 
-        onClose={() => setIsSettingsOpen(false)} 
-      />
     </div>
   );
 };

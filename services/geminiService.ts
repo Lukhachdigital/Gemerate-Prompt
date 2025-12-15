@@ -1,42 +1,6 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { ScriptRequest, GeneratedContent, PromptItem, FilmStyle, DialogueOption, CharacterProfile } from "../types";
 
-// --- HELPER: GET API KEY ---
-const getGeminiKey = (): string => {
-    // 1. Prioritize User Input from Settings (LocalStorage)
-    // This allows the app to work on GitHub Pages immediately without build configuration
-    const localKey = localStorage.getItem("GEMINI_API_KEY");
-    if (localKey && localKey.trim().length > 0) {
-        return localKey.trim();
-    }
-    
-    // 2. Vite Environment Variables (Standard for Vercel / Netlify / Vite Builds)
-    // On Vercel, you must name your Environment Variable "VITE_GEMINI_API_KEY"
-    // @ts-ignore
-    if (typeof import.meta !== 'undefined' && import.meta.env) {
-        // @ts-ignore
-        if (import.meta.env.VITE_GEMINI_API_KEY) {
-            // @ts-ignore
-            return import.meta.env.VITE_GEMINI_API_KEY;
-        }
-        // @ts-ignore
-        if (import.meta.env.API_KEY) {
-            // @ts-ignore
-            return import.meta.env.API_KEY;
-        }
-    }
-
-    // 3. Fallback to process.env (Legacy/Polyfill)
-    if (typeof process !== 'undefined' && process.env) {
-        if (process.env.API_KEY) return process.env.API_KEY;
-        // Check for VITE_ prefixed var in process.env just in case
-        if (process.env.VITE_GEMINI_API_KEY) return process.env.VITE_GEMINI_API_KEY;
-    }
-
-    // 4. Throw Error if missing
-    throw new Error("CHƯA CÓ API KEY. Vui lòng nhập Key trong phần Cài đặt (⚙️) hoặc cấu hình biến môi trường VITE_GEMINI_API_KEY.");
-};
-
 // --- HELPER FOR IMAGE CONVERSION ---
 const base64ToPart = (base64String: string) => {
     // Expected format: "data:image/png;base64,..."
@@ -151,8 +115,8 @@ const getStrictRules = (dialogueOption: DialogueOption) => `
 
 // --- GEMINI IMPLEMENTATION (MULTIMODAL) ---
 const callGemini = async (contentsParts: any[], responseSchema: any): Promise<any> => {
-    const apiKey = getGeminiKey();
-    const ai = new GoogleGenAI({ apiKey: apiKey });
+    // Guideline: API key must be obtained exclusively from process.env.API_KEY
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
     // gemini-2.5-flash is multimodal.
     const response = await ai.models.generateContent({

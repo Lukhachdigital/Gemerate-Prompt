@@ -1,11 +1,11 @@
 import React from 'react';
-import { VideoCameraIcon, Cog6ToothIcon } from '@heroicons/react/24/outline';
+import { VideoCameraIcon } from '@heroicons/react/24/outline';
 
 interface HeaderProps {
-  onOpenSettings: () => void;
+  // Removed onOpenSettings prop
 }
 
-const Header: React.FC<HeaderProps> = ({ onOpenSettings }) => {
+const Header: React.FC<HeaderProps> = () => {
   return (
     <header className="w-full h-16 flex items-center justify-between px-6 border-b border-gray-800 bg-[#050505] shrink-0 z-20">
       <div className="flex items-center gap-3">
@@ -17,16 +17,9 @@ const Header: React.FC<HeaderProps> = ({ onOpenSettings }) => {
       
       <div className="flex items-center gap-4">
         <div className="hidden md:block w-px h-4 bg-gray-800 mx-2"></div>
-        <div className="hidden md:block text-gray-500 text-xs uppercase tracking-widest font-medium mr-2">
+        <div className="hidden md:block text-gray-500 text-xs uppercase tracking-widest font-medium">
             Hollywood Screenwriter Assistant
         </div>
-        <button 
-          onClick={onOpenSettings}
-          className="text-gray-400 hover:text-amber-500 transition-colors p-2 rounded-full hover:bg-gray-900"
-          title="Cài đặt API Key"
-        >
-           <Cog6ToothIcon className="w-6 h-6" />
-        </button>
       </div>
     </header>
   );
