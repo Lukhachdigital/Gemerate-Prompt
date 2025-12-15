@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Header from './components/Header.tsx';
 import InputSection from './components/InputSection.tsx';
 import ScriptOutput from './components/ScriptOutput.tsx';
+import SettingsModal from './components/SettingsModal.tsx';
 import { GeneratedContent, FilmStyle, PromptItem, DialogueOption, CharacterProfile } from './types.ts';
 import { generateScriptFromList } from './services/geminiService.ts';
 
@@ -22,6 +23,9 @@ const App: React.FC = () => {
   // Track if current content came from a file
   const [isGeneratedFromFile, setIsGeneratedFromFile] = useState<boolean>(false);
 
+  // Settings Modal State
+  const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
+
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -37,7 +41,7 @@ const App: React.FC = () => {
         setContent(result);
     } catch (err: any) {
         console.error(err);
-        setError("Lỗi khi xử lý file. Vui lòng thử lại.");
+        setError(err.message || "Lỗi khi xử lý file. Vui lòng kiểm tra API Key trong Cài đặt.");
     } finally {
         setIsLoading(false);
     }
@@ -53,7 +57,7 @@ const App: React.FC = () => {
 
   return (
     <div className="flex flex-col h-screen bg-black text-gray-100 selection:bg-amber-500 selection:text-black overflow-hidden font-sans">
-      <Header />
+      <Header onOpenSettings={() => setIsSettingsOpen(true)} />
       
       <div className="flex flex-1 overflow-hidden">
         {/* Left Sidebar - Style & File Upload */}
@@ -108,6 +112,12 @@ const App: React.FC = () => {
           </div>
         </main>
       </div>
+
+      {/* Settings Modal */}
+      <SettingsModal 
+        isOpen={isSettingsOpen} 
+        onClose={() => setIsSettingsOpen(false)} 
+      />
     </div>
   );
 };
