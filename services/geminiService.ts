@@ -115,8 +115,15 @@ const getStrictRules = (dialogueOption: DialogueOption) => `
 
 // --- GEMINI IMPLEMENTATION (MULTIMODAL) ---
 const callGemini = async (contentsParts: any[], responseSchema: any): Promise<any> => {
-    // Guideline: API key must be obtained exclusively from process.env.API_KEY
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    // Check if API Key exists. If running on client without build replacement, this might fail,
+    // but our vite.config.ts `define` handles the injection.
+    const apiKey = process.env.API_KEY;
+
+    if (!apiKey) {
+        throw new Error("LỖI CẤU HÌNH: Không tìm thấy API KEY.\nNếu bạn đang dùng Vercel/Netlify, hãy vào Settings > Environment Variables và thêm biến 'API_KEY' với giá trị là mã của bạn.");
+    }
+
+    const ai = new GoogleGenAI({ apiKey });
 
     // gemini-2.5-flash is multimodal.
     const response = await ai.models.generateContent({
